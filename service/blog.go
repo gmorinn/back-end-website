@@ -7,6 +7,7 @@ import (
 	db "back-end-website/internal"
 	"back-end-website/utils"
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 )
@@ -111,7 +112,14 @@ func (s *BlogService) DeleteBlog(ctx context.Context, id mypkg.UUID) (*bool, err
 	var res bool = false
 
 	err := s.server.Store.ExecTx(ctx, func(q *db.Queries) error {
-		// delete blog
+		// check if blog exists
+		isBlog, err := q.CheckBlogByID(ctx, uuid.MustParse(string(id)))
+		if err != nil {
+			return err
+		}
+		if !isBlog {
+			return utils.ErrorResponse("BLOG_NOT_FOUND", errors.New("blog not found"))
+		}
 		if err := q.DeleteBlogByID(ctx, uuid.MustParse(string(id))); err != nil {
 			res = false
 			return err
@@ -130,7 +138,14 @@ func (s *BlogService) GetBlogs(ctx context.Context, limit int, offset int) ([]*m
 	var res []*model.Blog
 
 	err := s.server.Store.ExecTx(ctx, func(q *db.Queries) error {
-		// get blogs
+		// check if limit is valid
+		if limit < 0 {
+			return utils.ErrorResponse("INVALID_LIMIT", errors.New("limit must be greater than 0"))
+		}
+		// check if offset is valid
+		if offset < 0 {
+			return utils.ErrorResponse("INVALID_OFFSET", errors.New("offset must be greater than 0"))
+		}
 		blogs, err := q.GetAllBlog(ctx, db.GetAllBlogParams{
 			Limit:    int32(limit),
 			Offset:   int32(offset),

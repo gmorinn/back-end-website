@@ -4,7 +4,6 @@ import (
 	"back-end-website/config"
 	"back-end-website/graph"
 	"back-end-website/service"
-	"back-end-website/storage"
 	"back-end-website/utils"
 	"net/http"
 	"os"
@@ -94,12 +93,12 @@ func main() {
 	server := config.NewServer()
 
 	// init storage dataloayer
-	loader := storage.NewLoaders(server.Store)
+	// loader := storage.NewLoaders(server.Store)
 
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(mwServerHeader())
-	r.Use(storage.Middleware(loader))
+	// r.Use(storage.Middleware(loader))
 	r.Use(config.AuthMiddleware())
 	r.Use(gzip.Gzip(gzip.BestCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp4"})))
 	r.Use(cors.New(cors.Config{

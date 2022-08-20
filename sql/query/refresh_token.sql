@@ -20,8 +20,8 @@ LIMIT $2
 OFFSET $3;
 
 -- name: CreateRefreshToken :exec
-INSERT INTO refresh_token (token, expir_on, user_id) 
-VALUES ($1, $2, $3);
+INSERT INTO refresh_token (token, expir_on, user_id, ip, user_agent)
+VALUES ($1, $2, $3, $4, $5);
 
 -- name: DeleteRefreshToken :exec
 UPDATE refresh_token

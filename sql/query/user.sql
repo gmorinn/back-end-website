@@ -47,3 +47,10 @@ SET
     updated_at = NOW()
 WHERE
     id = $1;
+
+-- name: CheckUserByID :one
+SELECT EXISTS(
+    SELECT * FROM users
+    WHERE id = $1
+    AND deleted_at IS NULL
+);

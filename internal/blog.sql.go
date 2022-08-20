@@ -11,6 +11,21 @@ import (
 	"github.com/google/uuid"
 )
 
+const checkBlogByID = `-- name: CheckBlogByID :one
+SELECT EXISTS(
+    SELECT id, created_at, updated_at, deleted_at, user_id, title, content, image FROM blogs
+    WHERE id = $1
+    AND deleted_at IS NULL
+)
+`
+
+func (q *Queries) CheckBlogByID(ctx context.Context, id uuid.UUID) (bool, error) {
+	row := q.db.QueryRowContext(ctx, checkBlogByID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createBlog = `-- name: CreateBlog :exec
 INSERT INTO blogs (user_id, title, content, image)
 VALUES ($1, $2, $3, $4)

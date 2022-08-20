@@ -40,8 +40,6 @@ type JWTResponse struct {
 	AccessToken mypkg.JWT `json:"access_token"`
 	// use to refresh the access token
 	RefreshToken mypkg.JWT `json:"refresh_token"`
-	// true if the user can connect or false if not
-	Success bool `json:"success"`
 }
 
 type SigninInput struct {
@@ -80,8 +78,6 @@ type UpdateBlogInput struct {
 
 // payload send when you update a user
 type UpdateUserInput struct {
-	// name of the user (required)
-	Name string `json:"name"`
 	// email of the user (required)
 	Email mypkg.Email `json:"email"`
 	// firstname of the user (required)

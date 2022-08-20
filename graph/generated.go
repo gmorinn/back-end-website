@@ -61,7 +61,6 @@ type ComplexityRoot struct {
 	JWTResponse struct {
 		AccessToken  func(childComplexity int) int
 		RefreshToken func(childComplexity int) int
-		Success      func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -206,13 +205,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.JWTResponse.RefreshToken(childComplexity), true
-
-	case "JWTResponse.success":
-		if e.complexity.JWTResponse.Success == nil {
-			break
-		}
-
-		return e.complexity.JWTResponse.Success(childComplexity), true
 
 	case "Mutation.createBlog":
 		if e.complexity.Mutation.CreateBlog == nil {
@@ -597,8 +589,6 @@ input UploadInput {
   access_token: JWT!
   "use to refresh the access token"
   refresh_token: JWT!
-  "true if the user can connect or false if not"
-  success: Boolean!
 }
 
 input SigninInput {
@@ -724,8 +714,6 @@ type User {
 
 "payload send when you update a user"
 input UpdateUserInput {
-  "name of the user (required)"
-  name: String!
   "email of the user (required)"
   email: Email!
   "firstname of the user (required)"
@@ -1484,50 +1472,6 @@ func (ec *executionContext) fieldContext_JWTResponse_refresh_token(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _JWTResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.JWTResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_JWTResponse_success(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Success, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_JWTResponse_success(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "JWTResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_signin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_signin(ctx, field)
 	if err != nil {
@@ -1571,8 +1515,6 @@ func (ec *executionContext) fieldContext_Mutation_signin(ctx context.Context, fi
 				return ec.fieldContext_JWTResponse_access_token(ctx, field)
 			case "refresh_token":
 				return ec.fieldContext_JWTResponse_refresh_token(ctx, field)
-			case "success":
-				return ec.fieldContext_JWTResponse_success(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JWTResponse", field.Name)
 		},
@@ -1634,8 +1576,6 @@ func (ec *executionContext) fieldContext_Mutation_signup(ctx context.Context, fi
 				return ec.fieldContext_JWTResponse_access_token(ctx, field)
 			case "refresh_token":
 				return ec.fieldContext_JWTResponse_refresh_token(ctx, field)
-			case "success":
-				return ec.fieldContext_JWTResponse_success(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JWTResponse", field.Name)
 		},
@@ -1697,8 +1637,6 @@ func (ec *executionContext) fieldContext_Mutation_refresh(ctx context.Context, f
 				return ec.fieldContext_JWTResponse_access_token(ctx, field)
 			case "refresh_token":
 				return ec.fieldContext_JWTResponse_refresh_token(ctx, field)
-			case "success":
-				return ec.fieldContext_JWTResponse_success(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JWTResponse", field.Name)
 		},
@@ -5373,21 +5311,13 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "email", "firstname", "lastname", "id"}
+	fieldsInOrder := [...]string{"email", "firstname", "lastname", "id"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "email":
 			var err error
 
@@ -5572,13 +5502,6 @@ func (ec *executionContext) _JWTResponse(ctx context.Context, sel ast.SelectionS
 		case "refresh_token":
 
 			out.Values[i] = ec._JWTResponse_refresh_token(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "success":
-
-			out.Values[i] = ec._JWTResponse_success(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

@@ -3,8 +3,6 @@ type JWTResponse {
   access_token: JWT!
   "use to refresh the access token"
   refresh_token: JWT!
-  "true if the user can connect or false if not"
-  success: Boolean!
 }
 
 input SigninInput {

@@ -38,3 +38,10 @@ WHERE
 -- name: CreateBlog :exec
 INSERT INTO blogs (user_id, title, content, image)
 VALUES ($1, $2, $3, $4);
+
+-- name: CheckBlogByID :one
+SELECT EXISTS(
+    SELECT * FROM blogs
+    WHERE id = $1
+    AND deleted_at IS NULL
+);

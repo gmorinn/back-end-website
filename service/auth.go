@@ -29,6 +29,10 @@ func NewAuthService(server *config.Server) *AuthService {
 }
 
 func (s *AuthService) Signin(ctx context.Context, input *model.SigninInput) (*model.JWTResponse, error) {
+	isGoodPassword := utils.CheckPassword(input.Password)
+	if isGoodPassword != "" {
+		return nil, utils.ErrorResponse("PASSWORD_IS_NOT_GOOD", fmt.Errorf(isGoodPassword))
+	}
 	arg := db.LoginUserParams{
 		Email: string(input.Email),
 		Crypt: input.Password,
@@ -47,7 +51,6 @@ func (s *AuthService) Signin(ctx context.Context, input *model.SigninInput) (*mo
 	response := model.JWTResponse{
 		AccessToken:  mypkg.JWT(t),
 		RefreshToken: mypkg.JWT(r),
-		Success:      true,
 	}
 	return &response, nil
 }
@@ -63,9 +66,15 @@ func (s *AuthService) Signup(ctx context.Context, input *model.SignupInput) (*mo
 	if isExist {
 		return nil, utils.ErrorResponse("EMAIL_ALREADY_EXIST", fmt.Errorf("email already exist"))
 	}
+	isGoodPassword := utils.CheckPassword(input.Password)
+	if isGoodPassword != "" {
+		return nil, utils.ErrorResponse("ERROR_PASSWORD", fmt.Errorf(isGoodPassword))
+	}
 	arg := db.SignupParams{
-		Email: string(input.Email),
-		Crypt: input.Password,
+		Email:     string(input.Email),
+		Crypt:     input.Password,
+		Firstname: utils.NullS(string(input.Firstname)),
+		Lastname:  utils.NullS(string(input.Lastname)),
 	}
 	user, err := s.server.Store.Signup(ctx, arg)
 	if err != nil {
@@ -81,7 +90,6 @@ func (s *AuthService) Signup(ctx context.Context, input *model.SignupInput) (*mo
 	response := model.JWTResponse{
 		AccessToken:  mypkg.JWT(t),
 		RefreshToken: mypkg.JWT(r),
-		Success:      true,
 	}
 	return &response, nil
 }
@@ -111,7 +119,6 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken *mypkg.JWT)
 	response := model.JWTResponse{
 		AccessToken:  mypkg.JWT(t),
 		RefreshToken: mypkg.JWT(r),
-		Success:      true,
 	}
 	return &response, nil
 }

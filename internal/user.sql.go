@@ -12,6 +12,21 @@ import (
 	"github.com/google/uuid"
 )
 
+const checkUserByID = `-- name: CheckUserByID :one
+SELECT EXISTS(
+    SELECT id, created_at, updated_at, deleted_at, email, password, firstname, lastname, role FROM users
+    WHERE id = $1
+    AND deleted_at IS NULL
+)
+`
+
+func (q *Queries) CheckUserByID(ctx context.Context, id uuid.UUID) (bool, error) {
+	row := q.db.QueryRowContext(ctx, checkUserByID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const deleteUserByID = `-- name: DeleteUserByID :exec
 UPDATE
     users

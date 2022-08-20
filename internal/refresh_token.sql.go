@@ -14,18 +14,26 @@ import (
 )
 
 const createRefreshToken = `-- name: CreateRefreshToken :exec
-INSERT INTO refresh_token (token, expir_on, user_id) 
-VALUES ($1, $2, $3)
+INSERT INTO refresh_token (token, expir_on, user_id, ip, user_agent)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreateRefreshTokenParams struct {
-	Token   string    `json:"token"`
-	ExpirOn time.Time `json:"expir_on"`
-	UserID  uuid.UUID `json:"user_id"`
+	Token     string    `json:"token"`
+	ExpirOn   time.Time `json:"expir_on"`
+	UserID    uuid.UUID `json:"user_id"`
+	Ip        string    `json:"ip"`
+	UserAgent string    `json:"user_agent"`
 }
 
 func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error {
-	_, err := q.db.ExecContext(ctx, createRefreshToken, arg.Token, arg.ExpirOn, arg.UserID)
+	_, err := q.db.ExecContext(ctx, createRefreshToken,
+		arg.Token,
+		arg.ExpirOn,
+		arg.UserID,
+		arg.Ip,
+		arg.UserAgent,
+	)
 	return err
 }
 

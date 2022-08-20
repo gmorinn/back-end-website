@@ -12,7 +12,9 @@ import (
 )
 
 type Querier interface {
+	CheckBlogByID(ctx context.Context, id uuid.UUID) (bool, error)
 	CheckEmailExist(ctx context.Context, email string) (bool, error)
+	CheckUserByID(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateBlog(ctx context.Context, arg CreateBlogParams) error
 	CreateFile(ctx context.Context, arg CreateFileParams) (CreateFileRow, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error

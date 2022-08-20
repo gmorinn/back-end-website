@@ -21,8 +21,6 @@ type User {
 
 "payload send when you update a user"
 input UpdateUserInput {
-  "name of the user (required)"
-  name: String!
   "email of the user (required)"
   email: Email!
   "firstname of the user (required)"

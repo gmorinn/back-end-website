@@ -7,6 +7,8 @@ import (
 	db "back-end-website/internal"
 	"back-end-website/utils"
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -67,6 +69,14 @@ func (s *UserService) GetUsers(ctx context.Context, limit int, offset int) ([]*m
 	var res []*model.User = nil
 
 	err := s.server.Store.ExecTx(ctx, func(q *db.Queries) error {
+		// check if limit is valid
+		if limit < 0 {
+			return utils.ErrorResponse("INVALID_LIMIT", errors.New("limit must be greater than 0"))
+		}
+		// check if offset is valid
+		if offset < 0 {
+			return utils.ErrorResponse("INVALID_OFFSET", errors.New("offset must be greater than 0"))
+		}
 		sqlUsers, err := q.GetAllUser(ctx, db.GetAllUserParams{
 			Limit:        int32(limit),
 			Offset:       int32(offset),
@@ -118,6 +128,14 @@ func (s *UserService) DeleteUser(ctx context.Context, id mypkg.UUID) (*bool, err
 	var res bool = false
 
 	err := s.server.Store.ExecTx(ctx, func(q *db.Queries) error {
+		// check if user exists
+		isUser, err := q.CheckUserByID(ctx, uuid.MustParse(string(id)))
+		if err != nil {
+			return err
+		}
+		if !isUser {
+			return utils.ErrorResponse("USER_NOT_FOUND", errors.New("user not found"))
+		}
 		if err := q.DeleteUserByID(ctx, uuid.MustParse(string(id))); err != nil {
 			return err
 		}
@@ -137,7 +155,7 @@ func (s *UserService) UpdateRole(ctx context.Context, role model.UserType, id my
 	err := s.server.Store.ExecTx(ctx, func(q *db.Queries) error {
 		if err := q.UpdateRole(ctx, db.UpdateRoleParams{
 			ID:   uuid.MustParse(string(id)),
-			Role: db.Role(role),
+			Role: db.Role(strings.ToLower(string(role))),
 		}); err != nil {
 			return err
 		}
