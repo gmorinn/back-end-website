@@ -16,7 +16,7 @@ type Mutation {
     "update a user"
     updateUser(input: UpdateUserInput!): User @jwtAuth @hasRole(role: ADMIN) @jwtAuth
     "delete a user"
-    deleteUser(id: UUID!): User @jwtAuth @hasRole(role: ADMIN) @jwtAuth
+    deleteUser(id: UUID!): Boolean @jwtAuth @hasRole(role: ADMIN) @jwtAuth
     "update the user's role"
     updateRole(role: UserType!, id:UUID!): User! @hasRole(role: ADMIN) @jwtAuth
 
@@ -36,5 +36,5 @@ type Mutation {
     "update a blog"
     updateBlog(input: UpdateBlogInput!): Blog @hasRole(role: ADMIN) @jwtAuth
     "delete a blog"
-    deleteBlog(id:UUID!): Blog @hasRole(role: ADMIN) @jwtAuth
+    deleteBlog(id:UUID!): Boolean @hasRole(role: ADMIN) @jwtAuth
 }

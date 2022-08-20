@@ -1,5 +1,6 @@
 "All fields that represent a blog"
 type Blog{
+  id: UUID!
   user_id: UUID!
   created_at: Time!
   deleted_at: Time

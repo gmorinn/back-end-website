@@ -33,10 +33,8 @@ SET
     image = $4,
     updated_at = NOW()
 WHERE
-    id = $1
-RETURNING *;
+    id = $1;
 
--- name: InsertBlog :exec
+-- name: CreateBlog :exec
 INSERT INTO blogs (user_id, title, content, image)
-VALUES ($1, $2, $3, $4)
-RETURNING *;
+VALUES ($1, $2, $3, $4);

@@ -51,6 +51,7 @@ type ComplexityRoot struct {
 		Content   func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
 		DeletedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
 		Image     func(childComplexity int) int
 		Title     func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
@@ -107,12 +108,12 @@ type MutationResolver interface {
 	Signup(ctx context.Context, input model.SignupInput) (*model.JWTResponse, error)
 	Refresh(ctx context.Context, refreshToken mypkg.JWT) (*model.JWTResponse, error)
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error)
-	DeleteUser(ctx context.Context, id mypkg.UUID) (*model.User, error)
+	DeleteUser(ctx context.Context, id mypkg.UUID) (*bool, error)
 	UpdateRole(ctx context.Context, role model.UserType, id mypkg.UUID) (*model.User, error)
 	SingleUpload(ctx context.Context, file model.UploadInput) (*model.UploadResponse, error)
 	CreateBlog(ctx context.Context, input model.CreateBlogInput) (*model.Blog, error)
 	UpdateBlog(ctx context.Context, input model.UpdateBlogInput) (*model.Blog, error)
-	DeleteBlog(ctx context.Context, id mypkg.UUID) (*model.Blog, error)
+	DeleteBlog(ctx context.Context, id mypkg.UUID) (*bool, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, id mypkg.UUID) (*model.User, error)
@@ -156,6 +157,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Blog.DeletedAt(childComplexity), true
+
+	case "Blog.id":
+		if e.complexity.Blog.ID == nil {
+			break
+		}
+
+		return e.complexity.Blog.ID(childComplexity), true
 
 	case "Blog.image":
 		if e.complexity.Blog.Image == nil {
@@ -534,6 +542,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "../schema/blogs.graphqls", Input: `"All fields that represent a blog"
 type Blog{
+  id: UUID!
   user_id: UUID!
   created_at: Time!
   deleted_at: Time
@@ -629,7 +638,7 @@ input SignupInput {
     "update a user"
     updateUser(input: UpdateUserInput!): User @jwtAuth @hasRole(role: ADMIN) @jwtAuth
     "delete a user"
-    deleteUser(id: UUID!): User @jwtAuth @hasRole(role: ADMIN) @jwtAuth
+    deleteUser(id: UUID!): Boolean @jwtAuth @hasRole(role: ADMIN) @jwtAuth
     "update the user's role"
     updateRole(role: UserType!, id:UUID!): User! @hasRole(role: ADMIN) @jwtAuth
 
@@ -638,7 +647,7 @@ input SignupInput {
     # ********** FILE MUTATION *****************
     #
     "upload a file"
-    singleUpload(file: UploadInput!): UploadResponse! @jwtAuth
+    singleUpload(file: UploadInput!): UploadResponse! @jwtAuth @hasRole(role: ADMIN)
 
 
     #
@@ -649,15 +658,14 @@ input SignupInput {
     "update a blog"
     updateBlog(input: UpdateBlogInput!): Blog @hasRole(role: ADMIN) @jwtAuth
     "delete a blog"
-    deleteBlog(id:UUID!): Blog @hasRole(role: ADMIN) @jwtAuth
-}
-`, BuiltIn: false},
+    deleteBlog(id:UUID!): Boolean @hasRole(role: ADMIN) @jwtAuth
+}`, BuiltIn: false},
 	{Name: "../schema/query.graphqls", Input: `type Query {
     #
     # ********** USERS QUERY *****************
     #
     "returns one user by his id precising in the payload"
-    user(id:UUID!): User @jwtAuth
+    user(id:UUID!): User @jwtAuth @hasRole(role: ADMIN)
     "returns all users with a limit precising in the payload, need to be admin to access"
     users(limit: Int!, offset: Int!): [User] @hasRole(role: ADMIN) @jwtAuth
 
@@ -1038,6 +1046,50 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Blog_id(ctx context.Context, field graphql.CollectedField, obj *model.Blog) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Blog_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(mypkg.UUID)
+	fc.Result = res
+	return ec.marshalNUUID2backᚑendᚑwebsiteᚋgraphᚋmypkgᚐUUID(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Blog_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Blog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type UUID does not have child fields")
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _Blog_user_id(ctx context.Context, field graphql.CollectedField, obj *model.Blog) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Blog_user_id(ctx, field)
@@ -1818,10 +1870,10 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*model.User); ok {
+		if data, ok := tmp.(*bool); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *back-end-website/graph/model.User`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1830,9 +1882,9 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.User)
+	res := resTmp.(*bool)
 	fc.Result = res
-	return ec.marshalOUser2ᚖbackᚑendᚑwebsiteᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1842,25 +1894,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "firstname":
-				return ec.fieldContext_User_firstname(ctx, field)
-			case "lastname":
-				return ec.fieldContext_User_lastname(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "created_at":
-				return ec.fieldContext_User_created_at(ctx, field)
-			case "deleted_at":
-				return ec.fieldContext_User_deleted_at(ctx, field)
-			case "updated_at":
-				return ec.fieldContext_User_updated_at(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	defer func() {
@@ -2003,8 +2037,18 @@ func (ec *executionContext) _Mutation_singleUpload(ctx context.Context, field gr
 			}
 			return ec.directives.JwtAuth(ctx, nil, directive0)
 		}
+		directive2 := func(ctx context.Context) (interface{}, error) {
+			role, err := ec.unmarshalNUserType2backᚑendᚑwebsiteᚋgraphᚋmodelᚐUserType(ctx, "ADMIN")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasRole == nil {
+				return nil, errors.New("directive hasRole is not implemented")
+			}
+			return ec.directives.HasRole(ctx, nil, directive1, role)
+		}
 
-		tmp, err := directive1(rctx)
+		tmp, err := directive2(rctx)
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
@@ -2131,6 +2175,8 @@ func (ec *executionContext) fieldContext_Mutation_createBlog(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Blog_id(ctx, field)
 			case "user_id":
 				return ec.fieldContext_Blog_user_id(ctx, field)
 			case "created_at":
@@ -2229,6 +2275,8 @@ func (ec *executionContext) fieldContext_Mutation_updateBlog(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Blog_id(ctx, field)
 			case "user_id":
 				return ec.fieldContext_Blog_user_id(ctx, field)
 			case "created_at":
@@ -2302,10 +2350,10 @@ func (ec *executionContext) _Mutation_deleteBlog(ctx context.Context, field grap
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*model.Blog); ok {
+		if data, ok := tmp.(*bool); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *back-end-website/graph/model.Blog`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2314,9 +2362,9 @@ func (ec *executionContext) _Mutation_deleteBlog(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Blog)
+	res := resTmp.(*bool)
 	fc.Result = res
-	return ec.marshalOBlog2ᚖbackᚑendᚑwebsiteᚋgraphᚋmodelᚐBlog(ctx, field.Selections, res)
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteBlog(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2326,23 +2374,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteBlog(ctx context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "user_id":
-				return ec.fieldContext_Blog_user_id(ctx, field)
-			case "created_at":
-				return ec.fieldContext_Blog_created_at(ctx, field)
-			case "deleted_at":
-				return ec.fieldContext_Blog_deleted_at(ctx, field)
-			case "updated_at":
-				return ec.fieldContext_Blog_updated_at(ctx, field)
-			case "title":
-				return ec.fieldContext_Blog_title(ctx, field)
-			case "content":
-				return ec.fieldContext_Blog_content(ctx, field)
-			case "image":
-				return ec.fieldContext_Blog_image(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Blog", field.Name)
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	defer func() {
@@ -2382,8 +2414,18 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 			}
 			return ec.directives.JwtAuth(ctx, nil, directive0)
 		}
+		directive2 := func(ctx context.Context) (interface{}, error) {
+			role, err := ec.unmarshalNUserType2backᚑendᚑwebsiteᚋgraphᚋmodelᚐUserType(ctx, "ADMIN")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasRole == nil {
+				return nil, errors.New("directive hasRole is not implemented")
+			}
+			return ec.directives.HasRole(ctx, nil, directive1, role)
+		}
 
-		tmp, err := directive1(rctx)
+		tmp, err := directive2(rctx)
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
@@ -2585,6 +2627,8 @@ func (ec *executionContext) fieldContext_Query_blogs(ctx context.Context, field 
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Blog_id(ctx, field)
 			case "user_id":
 				return ec.fieldContext_Blog_user_id(ctx, field)
 			case "created_at":
@@ -2653,6 +2697,8 @@ func (ec *executionContext) fieldContext_Query_blog(ctx context.Context, field g
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Blog_id(ctx, field)
 			case "user_id":
 				return ec.fieldContext_Blog_user_id(ctx, field)
 			case "created_at":
@@ -5442,6 +5488,13 @@ func (ec *executionContext) _Blog(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Blog")
+		case "id":
+
+			out.Values[i] = ec._Blog_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "user_id":
 
 			out.Values[i] = ec._Blog_user_id(ctx, field, obj)

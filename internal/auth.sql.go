@@ -14,7 +14,7 @@ import (
 
 const checkEmailExist = `-- name: CheckEmailExist :one
 SELECT EXISTS(
-    SELECT id, created_at, updated_at, deleted_at, email, password, name, role FROM students
+    SELECT id, created_at, updated_at, deleted_at, email, password, firstname, lastname, role FROM users
     WHERE email = $1
     AND deleted_at IS NULL
 )
@@ -28,7 +28,7 @@ func (q *Queries) CheckEmailExist(ctx context.Context, email string) (bool, erro
 }
 
 const loginUser = `-- name: LoginUser :one
-SELECT id, name, email, role FROM students
+SELECT id, firstname lastname, email, role FROM users
 WHERE email = $1
 AND password = crypt($2, password)
 AND deleted_at IS NULL
@@ -40,10 +40,10 @@ type LoginUserParams struct {
 }
 
 type LoginUserRow struct {
-	ID    uuid.UUID      `json:"id"`
-	Name  sql.NullString `json:"name"`
-	Email string         `json:"email"`
-	Role  Role           `json:"role"`
+	ID       uuid.UUID      `json:"id"`
+	Lastname sql.NullString `json:"lastname"`
+	Email    string         `json:"email"`
+	Role     Role           `json:"role"`
 }
 
 func (q *Queries) LoginUser(ctx context.Context, arg LoginUserParams) (LoginUserRow, error) {
@@ -51,7 +51,7 @@ func (q *Queries) LoginUser(ctx context.Context, arg LoginUserParams) (LoginUser
 	var i LoginUserRow
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
+		&i.Lastname,
 		&i.Email,
 		&i.Role,
 	)
@@ -59,20 +59,26 @@ func (q *Queries) LoginUser(ctx context.Context, arg LoginUserParams) (LoginUser
 }
 
 const signup = `-- name: Signup :one
-INSERT INTO students (email, password, name) 
-VALUES ($1, crypt($2, gen_salt('bf')), $3)
-RETURNING id, created_at, updated_at, deleted_at, email, password, name, role
+INSERT INTO users (email, password, firstname, lastname) 
+VALUES ($1, crypt($2, gen_salt('bf')), $3, $4)
+RETURNING id, created_at, updated_at, deleted_at, email, password, firstname, lastname, role
 `
 
 type SignupParams struct {
-	Email string         `json:"email"`
-	Crypt string         `json:"crypt"`
-	Name  sql.NullString `json:"name"`
+	Email     string         `json:"email"`
+	Crypt     string         `json:"crypt"`
+	Firstname sql.NullString `json:"firstname"`
+	Lastname  sql.NullString `json:"lastname"`
 }
 
-func (q *Queries) Signup(ctx context.Context, arg SignupParams) (Student, error) {
-	row := q.db.QueryRowContext(ctx, signup, arg.Email, arg.Crypt, arg.Name)
-	var i Student
+func (q *Queries) Signup(ctx context.Context, arg SignupParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, signup,
+		arg.Email,
+		arg.Crypt,
+		arg.Firstname,
+		arg.Lastname,
+	)
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
@@ -80,7 +86,8 @@ func (q *Queries) Signup(ctx context.Context, arg SignupParams) (Student, error)
 		&i.DeletedAt,
 		&i.Email,
 		&i.Password,
-		&i.Name,
+		&i.Firstname,
+		&i.Lastname,
 		&i.Role,
 	)
 	return i, err

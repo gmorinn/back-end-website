@@ -13,24 +13,27 @@ import (
 
 type Querier interface {
 	CheckEmailExist(ctx context.Context, email string) (bool, error)
-	CountStudent(ctx context.Context) (int64, error)
+	CreateBlog(ctx context.Context, arg CreateBlogParams) error
 	CreateFile(ctx context.Context, arg CreateFileParams) (CreateFileRow, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
+	DeleteBlogByID(ctx context.Context, id uuid.UUID) error
 	DeleteFile(ctx context.Context, url sql.NullString) error
 	DeleteOldRefreshToken(ctx context.Context) error
 	DeleteRefreshToken(ctx context.Context, id uuid.UUID) error
-	DeleteStudentByID(ctx context.Context, id uuid.UUID) error
+	DeleteUserByID(ctx context.Context, id uuid.UUID) error
+	GetAllBlog(ctx context.Context, arg GetAllBlogParams) ([]Blog, error)
+	GetAllUser(ctx context.Context, arg GetAllUserParams) ([]User, error)
+	GetBlogByID(ctx context.Context, id uuid.UUID) (Blog, error)
 	GetFileByURL(ctx context.Context, url sql.NullString) (File, error)
 	GetOldRefreshToken(ctx context.Context) (RefreshToken, error)
 	GetRefreshToken(ctx context.Context, token string) (GetRefreshTokenRow, error)
-	GetStudentByID(ctx context.Context, id uuid.UUID) (Student, error)
-	InsertStudent(ctx context.Context, arg InsertStudentParams) (Student, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
 	ListRefreshTokenByUserID(ctx context.Context, arg ListRefreshTokenByUserIDParams) ([]RefreshToken, error)
-	Liststudents(ctx context.Context, arg ListstudentsParams) ([]Student, error)
 	LoginUser(ctx context.Context, arg LoginUserParams) (LoginUserRow, error)
-	Signup(ctx context.Context, arg SignupParams) (Student, error)
-	UpdateRoleStudent(ctx context.Context, arg UpdateRoleStudentParams) error
-	UpdateStudent(ctx context.Context, arg UpdateStudentParams) error
+	Signup(ctx context.Context, arg SignupParams) (User, error)
+	UpdateBlog(ctx context.Context, arg UpdateBlogParams) error
+	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
+	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 }
 
 var _ Querier = (*Queries)(nil)

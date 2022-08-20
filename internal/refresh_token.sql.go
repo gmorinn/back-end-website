@@ -77,29 +77,31 @@ func (q *Queries) GetOldRefreshToken(ctx context.Context) (RefreshToken, error) 
 const getRefreshToken = `-- name: GetRefreshToken :one
 SELECT 
 refresh_token.id, refresh_token.created_at, refresh_token.updated_at, refresh_token.deleted_at, refresh_token.token, refresh_token.ip, refresh_token.user_agent, refresh_token.expir_on, refresh_token.user_id,
-u.name AS user_name,
+u.firstname AS user_firstname,
+u.lastname AS user_lastname,
 u.email AS user_email,
 u.role AS user_role
 FROM refresh_token
-LEFT JOIN students u ON (u.id = refresh_token.user_id)
+LEFT JOIN users u ON (u.id = refresh_token.user_id)
 WHERE refresh_token.token = $1
 AND refresh_token.deleted_at IS NULL
 AND u.deleted_at IS NULL
 `
 
 type GetRefreshTokenRow struct {
-	ID        uuid.UUID      `json:"id"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt sql.NullTime   `json:"deleted_at"`
-	Token     string         `json:"token"`
-	Ip        string         `json:"ip"`
-	UserAgent string         `json:"user_agent"`
-	ExpirOn   time.Time      `json:"expir_on"`
-	UserID    uuid.UUID      `json:"user_id"`
-	UserName  sql.NullString `json:"user_name"`
-	UserEmail sql.NullString `json:"user_email"`
-	UserRole  Role           `json:"user_role"`
+	ID            uuid.UUID      `json:"id"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	DeletedAt     sql.NullTime   `json:"deleted_at"`
+	Token         string         `json:"token"`
+	Ip            string         `json:"ip"`
+	UserAgent     string         `json:"user_agent"`
+	ExpirOn       time.Time      `json:"expir_on"`
+	UserID        uuid.UUID      `json:"user_id"`
+	UserFirstname sql.NullString `json:"user_firstname"`
+	UserLastname  sql.NullString `json:"user_lastname"`
+	UserEmail     sql.NullString `json:"user_email"`
+	UserRole      Role           `json:"user_role"`
 }
 
 func (q *Queries) GetRefreshToken(ctx context.Context, token string) (GetRefreshTokenRow, error) {
@@ -115,7 +117,8 @@ func (q *Queries) GetRefreshToken(ctx context.Context, token string) (GetRefresh
 		&i.UserAgent,
 		&i.ExpirOn,
 		&i.UserID,
-		&i.UserName,
+		&i.UserFirstname,
+		&i.UserLastname,
 		&i.UserEmail,
 		&i.UserRole,
 	)

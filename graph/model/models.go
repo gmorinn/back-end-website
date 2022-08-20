@@ -14,6 +14,7 @@ import (
 
 // All fields that represent a blog
 type Blog struct {
+	ID        mypkg.UUID `json:"id"`
 	UserID    mypkg.UUID `json:"user_id"`
 	CreatedAt time.Time  `json:"created_at"`
 	DeletedAt *time.Time `json:"deleted_at"`

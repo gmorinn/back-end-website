@@ -30,7 +30,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 }
 
 // DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, id mypkg.UUID) (*model.User, error) {
+func (r *mutationResolver) DeleteUser(ctx context.Context, id mypkg.UUID) (*bool, error) {
 	return r.UserService.DeleteUser(ctx, id)
 }
 
@@ -55,7 +55,7 @@ func (r *mutationResolver) UpdateBlog(ctx context.Context, input model.UpdateBlo
 }
 
 // DeleteBlog is the resolver for the deleteBlog field.
-func (r *mutationResolver) DeleteBlog(ctx context.Context, id mypkg.UUID) (*model.Blog, error) {
+func (r *mutationResolver) DeleteBlog(ctx context.Context, id mypkg.UUID) (*bool, error) {
 	return r.BlogService.DeleteBlog(ctx, id)
 }
 
