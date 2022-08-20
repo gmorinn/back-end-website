@@ -2,7 +2,6 @@ package graph
 
 import (
 	"back-end-website/service"
-	"sync"
 )
 
 // This file will not be regenerated automatically.
@@ -14,6 +13,4 @@ type Resolver struct {
 	BlogService service.IBlogService
 	AuthService service.IAuthService
 	FileService service.IFileService
-
-	mu sync.Mutex
 }

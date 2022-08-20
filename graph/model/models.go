@@ -13,7 +13,7 @@ import (
 )
 
 // All fields that represent a blog
-type BlogResponse struct {
+type Blog struct {
 	UserID    mypkg.UUID `json:"user_id"`
 	CreatedAt time.Time  `json:"created_at"`
 	DeletedAt *time.Time `json:"deleted_at"`
@@ -30,38 +30,8 @@ type CreateBlogInput struct {
 	Content string `json:"content"`
 	// image of the blog (required)
 	Image string `json:"image"`
-}
-
-// Response when you get a blog
-type GetBlogResponse struct {
-	// if the request was successful or not, return always a value
-	Success bool `json:"success"`
-	// return the blog if the request was successful
-	User *BlogResponse `json:"user"`
-}
-
-// Response when you get many blogs
-type GetBlogsResponse struct {
-	// if the request was successful or not, return always a value
-	Success bool `json:"success"`
-	// return an array of blog if the request was successful or null if there is an error or no users
-	Users []*BlogResponse `json:"users"`
-}
-
-// Response when you get a user
-type GetUserResponse struct {
-	// if the request was successful or not, return always a value
-	Success bool `json:"success"`
-	// return the user if the request was successful
-	User *UserResponse `json:"user"`
-}
-
-// Response when you get many users
-type GetUsersResponse struct {
-	// if the request was successful or not, return always a value
-	Success bool `json:"success"`
-	// return an array of user if the request was successful or null if there is an error or no users
-	Users []*UserResponse `json:"users"`
+	// user id of the blog (required)
+	UserID mypkg.UUID `json:"user_id"`
 }
 
 type JWTResponse struct {
@@ -71,19 +41,6 @@ type JWTResponse struct {
 	RefreshToken mypkg.JWT `json:"refresh_token"`
 	// true if the user can connect or false if not
 	Success bool `json:"success"`
-}
-
-// All fields that represent a project
-type ProjectResponse struct {
-	UserID    mypkg.UUID `json:"user_id"`
-	CreatedAt time.Time  `json:"created_at"`
-	DeletedAt *time.Time `json:"deleted_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	Title     string     `json:"title"`
-	Content   string     `json:"content"`
-	Image     string     `json:"image"`
-	Language  string     `json:"language"`
-	URL       mypkg.URL  `json:"url"`
 }
 
 type SigninInput struct {
@@ -112,13 +69,15 @@ type UpdateBlogInput struct {
 	Title string `json:"title"`
 	// content of the blog (required)
 	Content string `json:"content"`
-	// id of the blog (required)
-	ID mypkg.UUID `json:"id"`
 	// image of the blog (required)
 	Image string `json:"image"`
+	// user_id of the blog (required)
+	UserID mypkg.UUID `json:"user_id"`
+	// id of the blog (required)
+	ID mypkg.UUID `json:"id"`
 }
 
-// payload send when you add a user
+// payload send when you update a user
 type UpdateUserInput struct {
 	// name of the user (required)
 	Name string `json:"name"`
@@ -130,8 +89,6 @@ type UpdateUserInput struct {
 	Lastname string `json:"lastname"`
 	// id of the user (required)
 	ID mypkg.UUID `json:"id"`
-	// role of the user (required)
-	Role UserType `json:"role"`
 }
 
 type UploadInput struct {
@@ -152,7 +109,7 @@ type UploadResponse struct {
 }
 
 // All fields that represent a user
-type UserResponse struct {
+type User struct {
 	Firstname string      `json:"firstname"`
 	Lastname  string      `json:"lastname"`
 	Email     mypkg.Email `json:"email"`

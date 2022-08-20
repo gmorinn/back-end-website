@@ -1,0 +1,35 @@
+"All fields that represent a blog"
+type Blog{
+  user_id: UUID!
+  created_at: Time!
+  deleted_at: Time
+  updated_at: Time!
+  title: String!
+  content: String!
+  image: String!
+}
+
+"payload send when you add a blog"
+input UpdateBlogInput {
+  "title of the blog (required)"
+  title: String!
+  "content of the blog (required)"
+  content: String!
+  "image of the blog (required)"
+  image: String!
+  "user_id of the blog (required)"
+  user_id: UUID!
+  "id of the blog (required)"
+  id: UUID!
+}
+
+input CreateBlogInput {
+  "title of the blog (required)"
+  title: String!
+  "content of the blog (required)"
+  content: String!
+  "image of the blog (required)"
+  image: String!
+  "user id of the blog (required)"
+  user_id: UUID!
+}

@@ -12,7 +12,7 @@ import (
 )
 
 type IFileService interface {
-	UploadSingleFile(ctx context.Context, file *model.UploadInput) (*model.File, error)
+	UploadSingleFile(ctx context.Context, file *model.UploadInput) (*model.UploadResponse, error)
 }
 
 type FileService struct {
@@ -25,10 +25,10 @@ func NewFileService(server *config.Server) *FileService {
 	}
 }
 
-func (s *FileService) UploadSingleFile(ctx context.Context, file *model.UploadInput) (*model.File, error) {
+func (s *FileService) UploadSingleFile(ctx context.Context, file *model.UploadInput) (*model.UploadResponse, error) {
 	var content []byte
 	var err error
-	var res *model.File
+	var res *model.UploadResponse
 
 	err = s.server.Store.ExecTx(ctx, func(q *db.Queries) error {
 		// check if file extension is allowed
@@ -84,7 +84,7 @@ func (s *FileService) UploadSingleFile(ctx context.Context, file *model.UploadIn
 		if err != nil {
 			return fmt.Errorf("ERROR_CREATE_FILE: %v", err)
 		}
-		res = &model.File{
+		res = &model.UploadResponse{
 			Name:    newFile.Name.String,
 			URL:     newFile.Url.String,
 			Size:    int(newFile.Size.Int64),
