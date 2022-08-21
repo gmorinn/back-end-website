@@ -37,4 +37,14 @@ type Mutation {
     updateBlog(input: UpdateBlogInput!): Blog @hasRole(role: ADMIN) @jwtAuth
     "delete a blog"
     deleteBlog(id:UUID!): Boolean @hasRole(role: ADMIN) @jwtAuth
+
+    #
+    # ********** PROJECTS MUTATION *****************
+    #
+    "create a new Project"
+    createProject(input: CreateProjectInput!): Project @hasRole(role: ADMIN) @jwtAuth
+    "update a Project"
+    updateProject(input: UpdateProjectInput!): Project @hasRole(role: ADMIN) @jwtAuth
+    "delete a Project"
+    deleteProject(id:UUID!): Boolean @hasRole(role: ADMIN) @jwtAuth
 }

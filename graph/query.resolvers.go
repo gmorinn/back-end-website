@@ -29,6 +29,16 @@ func (r *queryResolver) Blog(ctx context.Context, id mypkg.UUID) (*model.Blog, e
 	return r.BlogService.GetBlog(ctx, id)
 }
 
+// Projects is the resolver for the projects field.
+func (r *queryResolver) Projects(ctx context.Context, limit int, offset int) ([]*model.Project, error) {
+	return r.ProjectService.GetProjects(ctx, limit, offset)
+}
+
+// Project is the resolver for the project field.
+func (r *queryResolver) Project(ctx context.Context, id mypkg.UUID) (*model.Project, error) {
+	return r.ProjectService.GetProject(ctx, id)
+}
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 

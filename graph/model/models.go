@@ -35,11 +35,44 @@ type CreateBlogInput struct {
 	UserID mypkg.UUID `json:"user_id"`
 }
 
+// payload send when you add a Project
+type CreateProjectInput struct {
+	// title of the Project (required)
+	Title string `json:"title"`
+	// content of the Project (required)
+	Content string `json:"content"`
+	// img_cover of the Project (required)
+	ImgCover string `json:"img_cover"`
+	// img_description of the Project (required)
+	ImgDescription string `json:"img_description"`
+	// user_id of the Project (required)
+	UserID mypkg.UUID `json:"user_id"`
+	// language of the Project (required)
+	Language string `json:"language"`
+	// url of the Project (required)
+	URL string `json:"url"`
+}
+
 type JWTResponse struct {
 	// jwt token for user to authenticate, contains user id, role and expiry
 	AccessToken mypkg.JWT `json:"access_token"`
 	// use to refresh the access token
 	RefreshToken mypkg.JWT `json:"refresh_token"`
+}
+
+// All fields that represent a project
+type Project struct {
+	ID             mypkg.UUID `json:"id"`
+	UserID         mypkg.UUID `json:"user_id"`
+	CreatedAt      time.Time  `json:"created_at"`
+	DeletedAt      *time.Time `json:"deleted_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+	Title          string     `json:"title"`
+	Content        string     `json:"content"`
+	ImgCover       string     `json:"img_cover"`
+	ImgDescription string     `json:"img_description"`
+	Language       string     `json:"language"`
+	URL            string     `json:"url"`
 }
 
 type SigninInput struct {
@@ -73,6 +106,26 @@ type UpdateBlogInput struct {
 	// user_id of the blog (required)
 	UserID mypkg.UUID `json:"user_id"`
 	// id of the blog (required)
+	ID mypkg.UUID `json:"id"`
+}
+
+// payload send when you add a Project
+type UpdateProjectInput struct {
+	// title of the Project (required)
+	Title string `json:"title"`
+	// content of the Project (required)
+	Content string `json:"content"`
+	// img_cover of the Project (required)
+	ImgCover string `json:"img_cover"`
+	// img_description of the Project (required)
+	ImgDescription string `json:"img_description"`
+	// user_id of the Project (required)
+	UserID mypkg.UUID `json:"user_id"`
+	// language of the Project (required)
+	Language string `json:"language"`
+	// url of the Project (required)
+	URL string `json:"url"`
+	// id of the Project (required)
 	ID mypkg.UUID `json:"id"`
 }
 

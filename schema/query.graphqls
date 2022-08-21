@@ -15,4 +15,13 @@ type Query {
     blogs(limit: Int!, offset: Int!): [Blog]
     "returns one blog by his id precising in the payload"
     blog(id:UUID!): Blog
+
+
+    #
+    # ********** PROJECT QUERY *****************
+    #
+    "returns all Project with a limit precising in the payload, no need of role to access"
+    projects(limit: Int!, offset: Int!): [Project]
+    "returns one Project by his id precising in the payload"
+    project(id:UUID!): Project
 }

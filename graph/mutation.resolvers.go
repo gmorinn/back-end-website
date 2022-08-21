@@ -59,6 +59,21 @@ func (r *mutationResolver) DeleteBlog(ctx context.Context, id mypkg.UUID) (*bool
 	return r.BlogService.DeleteBlog(ctx, id)
 }
 
+// CreateProject is the resolver for the createProject field.
+func (r *mutationResolver) CreateProject(ctx context.Context, input model.CreateProjectInput) (*model.Project, error) {
+	return r.ProjectService.CreateProject(ctx, &input)
+}
+
+// UpdateProject is the resolver for the updateProject field.
+func (r *mutationResolver) UpdateProject(ctx context.Context, input model.UpdateProjectInput) (*model.Project, error) {
+	return r.ProjectService.UpdateProject(ctx, &input)
+}
+
+// DeleteProject is the resolver for the deleteProject field.
+func (r *mutationResolver) DeleteProject(ctx context.Context, id mypkg.UUID) (*bool, error) {
+	return r.ProjectService.DeleteProject(ctx, id)
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

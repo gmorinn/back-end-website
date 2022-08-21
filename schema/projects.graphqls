@@ -1,0 +1,56 @@
+"All fields that represent a project"
+type Project{
+  id: UUID!
+  user_id: UUID!
+  created_at: Time!
+  deleted_at: Time
+  updated_at: Time!
+  title: String!
+  content: String!
+  img_cover: String!
+  img_description: String!
+  language: String!
+  url: String!
+}
+
+
+"payload send when you add a Project"
+input UpdateProjectInput {
+    "title of the Project (required)"
+    title: String!
+    "content of the Project (required)"
+    content: String!
+    "img_cover of the Project (required)"
+    img_cover: String!
+    "img_description of the Project (required)"
+    img_description: String!
+    "user_id of the Project (required)"
+    user_id: UUID!
+    "language of the Project (required)"
+    language: String!
+    "url of the Project (required)"
+    url: String!
+    "id of the Project (required)"
+    id: UUID!
+}
+
+
+"payload send when you add a Project"
+input CreateProjectInput {
+    "title of the Project (required)"
+    title: String!
+    "content of the Project (required)"
+    content: String!
+    "img_cover of the Project (required)"
+    img_cover: String!
+    "img_description of the Project (required)"
+    img_description: String!
+    "user_id of the Project (required)"
+    user_id: UUID!
+    "language of the Project (required)"
+    language: String!
+    "url of the Project (required)"
+    url: String!
+}
+
+
