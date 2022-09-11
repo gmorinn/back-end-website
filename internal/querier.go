@@ -16,7 +16,7 @@ type Querier interface {
 	CheckEmailExist(ctx context.Context, email string) (bool, error)
 	CheckProjectByID(ctx context.Context, id uuid.UUID) (bool, error)
 	CheckUserByID(ctx context.Context, id uuid.UUID) (bool, error)
-	CreateBlog(ctx context.Context, arg CreateBlogParams) error
+	CreateBlog(ctx context.Context, arg CreateBlogParams) (Blog, error)
 	CreateFile(ctx context.Context, arg CreateFileParams) (CreateFileRow, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
 	DeleteBlogByID(ctx context.Context, id uuid.UUID) error
@@ -34,7 +34,7 @@ type Querier interface {
 	GetProjectByID(ctx context.Context, id uuid.UUID) (Project, error)
 	GetRefreshToken(ctx context.Context, token string) (GetRefreshTokenRow, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
-	InsertProject(ctx context.Context, arg InsertProjectParams) error
+	InsertProject(ctx context.Context, arg InsertProjectParams) (Project, error)
 	ListRefreshTokenByUserID(ctx context.Context, arg ListRefreshTokenByUserIDParams) ([]RefreshToken, error)
 	LoginUser(ctx context.Context, arg LoginUserParams) (LoginUserRow, error)
 	Signup(ctx context.Context, arg SignupParams) (User, error)

@@ -35,9 +35,10 @@ SET
 WHERE
     id = $1;
 
--- name: CreateBlog :exec
+-- name: CreateBlog :one
 INSERT INTO blogs (user_id, title, content, image)
-VALUES ($1, $2, $3, $4);
+VALUES ($1, $2, $3, $4)
+RETURNING *;
 
 -- name: CheckBlogByID :one
 SELECT EXISTS(

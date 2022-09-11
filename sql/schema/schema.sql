@@ -6,6 +6,12 @@
     'user'
   );
 
+   CREATE TYPE "project_tag" AS ENUM (
+    'webdevelopment',
+    'socialmedia'
+  );
+
+
   CREATE TABLE "users" (
     "id" uuid PRIMARY KEY DEFAULT (gen_random_uuid()),
     "created_at" timestamp NOT NULL DEFAULT (now()),
@@ -39,7 +45,8 @@
     "content" text NOT NULL CONSTRAINT contentchk CHECK (char_length(content) >= 2 AND char_length(content) <= 500),
     "img_cover" text NOT NULL,
     "img_description" text NOT NULL,
-    "language" text NOT NULL CONSTRAINT languagechk CHECK (language ~* '^[A-Za-z]{2}$'),
+    "language" text,
+    "tag" project_tag NOT NULL DEFAULT 'webdevelopment',
     "url" text NOT NULL
   );
 

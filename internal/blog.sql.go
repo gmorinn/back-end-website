@@ -26,9 +26,10 @@ func (q *Queries) CheckBlogByID(ctx context.Context, id uuid.UUID) (bool, error)
 	return exists, err
 }
 
-const createBlog = `-- name: CreateBlog :exec
+const createBlog = `-- name: CreateBlog :one
 INSERT INTO blogs (user_id, title, content, image)
 VALUES ($1, $2, $3, $4)
+RETURNING id, created_at, updated_at, deleted_at, user_id, title, content, image
 `
 
 type CreateBlogParams struct {
@@ -38,14 +39,25 @@ type CreateBlogParams struct {
 	Image   string    `json:"image"`
 }
 
-func (q *Queries) CreateBlog(ctx context.Context, arg CreateBlogParams) error {
-	_, err := q.db.ExecContext(ctx, createBlog,
+func (q *Queries) CreateBlog(ctx context.Context, arg CreateBlogParams) (Blog, error) {
+	row := q.db.QueryRowContext(ctx, createBlog,
 		arg.UserID,
 		arg.Title,
 		arg.Content,
 		arg.Image,
 	)
-	return err
+	var i Blog
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.UserID,
+		&i.Title,
+		&i.Content,
+		&i.Image,
+	)
+	return i, err
 }
 
 const deleteBlogByID = `-- name: DeleteBlogByID :exec

@@ -51,17 +51,18 @@ func (s *BlogService) CreateBlog(ctx context.Context, input *model.CreateBlogInp
 
 	err := s.server.Store.ExecTx(ctx, func(q *db.Queries) error {
 		// create blog
-		if err := q.CreateBlog(ctx, db.CreateBlogParams{
+		newBlog, err := q.CreateBlog(ctx, db.CreateBlogParams{
 			Title:   input.Title,
 			Content: input.Content,
 			Image:   input.Image,
 			UserID:  uuid.MustParse(string(input.UserID)),
-		}); err != nil {
+		})
+		if err != nil {
 			return err
 		}
 
 		// get blog
-		blog, err := q.GetBlogByID(ctx, uuid.MustParse(string(input.UserID)))
+		blog, err := q.GetBlogByID(ctx, uuid.MustParse(string(newBlog.ID.String())))
 		if err != nil {
 			return err
 		}

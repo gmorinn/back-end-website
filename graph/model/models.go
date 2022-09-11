@@ -51,6 +51,8 @@ type CreateProjectInput struct {
 	Language string `json:"language"`
 	// url of the Project (required)
 	URL string `json:"url"`
+	// tag of the Project (required)
+	Tag ProjectTag `json:"tag"`
 }
 
 type JWTResponse struct {
@@ -69,6 +71,7 @@ type Project struct {
 	UpdatedAt      time.Time  `json:"updated_at"`
 	Title          string     `json:"title"`
 	Content        string     `json:"content"`
+	Tag            ProjectTag `json:"tag"`
 	ImgCover       string     `json:"img_cover"`
 	ImgDescription string     `json:"img_description"`
 	Language       string     `json:"language"`
@@ -127,6 +130,8 @@ type UpdateProjectInput struct {
 	URL string `json:"url"`
 	// id of the Project (required)
 	ID mypkg.UUID `json:"id"`
+	// tag of the Project (required)
+	Tag ProjectTag `json:"tag"`
 }
 
 // payload send when you update a user
@@ -168,6 +173,47 @@ type User struct {
 	CreatedAt time.Time   `json:"created_at"`
 	DeletedAt *time.Time  `json:"deleted_at"`
 	UpdatedAt time.Time   `json:"updated_at"`
+}
+
+type ProjectTag string
+
+const (
+	ProjectTagWebdevelopment ProjectTag = "WEBDEVELOPMENT"
+	ProjectTagSocialmedia    ProjectTag = "SOCIALMEDIA"
+)
+
+var AllProjectTag = []ProjectTag{
+	ProjectTagWebdevelopment,
+	ProjectTagSocialmedia,
+}
+
+func (e ProjectTag) IsValid() bool {
+	switch e {
+	case ProjectTagWebdevelopment, ProjectTagSocialmedia:
+		return true
+	}
+	return false
+}
+
+func (e ProjectTag) String() string {
+	return string(e)
+}
+
+func (e *ProjectTag) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProjectTag(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProjectTag", str)
+	}
+	return nil
+}
+
+func (e ProjectTag) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type UserType string

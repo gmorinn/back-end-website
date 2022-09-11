@@ -103,9 +103,9 @@ func main() {
 	r.Use(config.AuthMiddleware())
 	r.Use(gzip.Gzip(gzip.BestCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp4"})))
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://" + os.Getenv("API_DOMAIN") + os.Getenv("API_PORT")},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Authorization", "Content-Type", "jwtToken"},
+		AllowHeaders:     []string{"Authorization", "Content-Type", "jwtToken", "Origin", "Accept", "X-Requested-With", "apollographql-client-version", "apollographql-client-name"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))

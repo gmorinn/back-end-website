@@ -12,6 +12,25 @@ import (
 	"github.com/google/uuid"
 )
 
+type ProjectTag string
+
+const (
+	ProjectTagWebdevelopment ProjectTag = "webdevelopment"
+	ProjectTagSocialmedia    ProjectTag = "socialmedia"
+)
+
+func (e *ProjectTag) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ProjectTag(s)
+	case string:
+		*e = ProjectTag(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ProjectTag: %T", src)
+	}
+	return nil
+}
+
 type Role string
 
 const (
@@ -55,17 +74,18 @@ type File struct {
 }
 
 type Project struct {
-	ID             uuid.UUID    `json:"id"`
-	CreatedAt      time.Time    `json:"created_at"`
-	UpdatedAt      time.Time    `json:"updated_at"`
-	DeletedAt      sql.NullTime `json:"deleted_at"`
-	UserID         uuid.UUID    `json:"user_id"`
-	Title          string       `json:"title"`
-	Content        string       `json:"content"`
-	ImgCover       string       `json:"img_cover"`
-	ImgDescription string       `json:"img_description"`
-	Language       string       `json:"language"`
-	Url            string       `json:"url"`
+	ID             uuid.UUID      `json:"id"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	DeletedAt      sql.NullTime   `json:"deleted_at"`
+	UserID         uuid.UUID      `json:"user_id"`
+	Title          string         `json:"title"`
+	Content        string         `json:"content"`
+	ImgCover       string         `json:"img_cover"`
+	ImgDescription string         `json:"img_description"`
+	Language       sql.NullString `json:"language"`
+	Tag            ProjectTag     `json:"tag"`
+	Url            string         `json:"url"`
 }
 
 type RefreshToken struct {

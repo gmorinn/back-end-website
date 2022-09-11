@@ -39,7 +39,8 @@ func SqlProjectToGraphProject(sqlProject *db.Project) *model.Project {
 		ImgCover:       sqlProject.ImgCover,
 		ImgDescription: sqlProject.ImgDescription,
 		URL:            sqlProject.Url,
-		Language:       sqlProject.Language,
+		Language:       sqlProject.Language.String,
+		Tag:            model.ProjectTag(sqlProject.Tag),
 	}
 }
 
@@ -53,21 +54,31 @@ func (s *ProjectService) CreateProject(ctx context.Context, input *model.CreateP
 	var res *model.Project
 
 	err := s.server.Store.ExecTx(ctx, func(q *db.Queries) error {
+		// check if user_id exists
+		isUser, err := q.CheckUserByID(ctx, uuid.MustParse(string(input.UserID)))
+		if err != nil {
+			return err
+		}
+		if !isUser {
+			return utils.ErrorResponse("USER_NOT_FOUND", errors.New("User not found"))
+		}
 		// create Project
-		if err := q.InsertProject(ctx, db.InsertProjectParams{
+		newProject, err := q.InsertProject(ctx, db.InsertProjectParams{
 			Title:          input.Title,
 			Content:        input.Content,
-			Language:       input.Language,
+			Language:       utils.NullS(input.Language),
 			Url:            input.URL,
+			Tag:            db.ProjectTag(input.Tag),
 			ImgCover:       input.ImgCover,
 			ImgDescription: input.ImgDescription,
 			UserID:         uuid.MustParse(string(input.UserID)),
-		}); err != nil {
+		})
+		if err != nil {
 			return err
 		}
 
 		// get Project
-		p, err := q.GetProjectByID(ctx, uuid.MustParse(string(input.UserID)))
+		p, err := q.GetProjectByID(ctx, uuid.MustParse(string(newProject.ID.String())))
 		if err != nil {
 			return err
 		}
@@ -92,7 +103,8 @@ func (s *ProjectService) UpdateProject(ctx context.Context, input *model.UpdateP
 			ID:             uuid.MustParse(string(input.ID)),
 			Title:          input.Title,
 			Content:        input.Content,
-			Language:       input.Language,
+			Language:       utils.NullS(input.Language),
+			Tag:            db.ProjectTag(input.Tag),
 			Url:            input.URL,
 			ImgCover:       input.ImgCover,
 			ImgDescription: input.ImgDescription,

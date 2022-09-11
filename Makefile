@@ -16,6 +16,7 @@ init:
 gen:
 	@echo -e "\n\t🧠\n"
 	@go run github.com/99designs/gqlgen generate
+	sqlc generate
 
 sql:
 	@echo -e "\n\t🧠\n"

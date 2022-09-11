@@ -87,6 +87,7 @@ type ComplexityRoot struct {
 		ImgCover       func(childComplexity int) int
 		ImgDescription func(childComplexity int) int
 		Language       func(childComplexity int) int
+		Tag            func(childComplexity int) int
 		Title          func(childComplexity int) int
 		URL            func(childComplexity int) int
 		UpdatedAt      func(childComplexity int) int
@@ -434,6 +435,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Project.Language(childComplexity), true
+
+	case "Project.tag":
+		if e.complexity.Project.Tag == nil {
+			break
+		}
+
+		return e.complexity.Project.Tag(childComplexity), true
 
 	case "Project.title":
 		if e.complexity.Project.Title == nil {
@@ -823,7 +831,12 @@ input SignupInput {
     "delete a Project"
     deleteProject(id:UUID!): Boolean @hasRole(role: ADMIN) @jwtAuth
 }`, BuiltIn: false},
-	{Name: "../schema/projects.graphqls", Input: `"All fields that represent a project"
+	{Name: "../schema/projects.graphqls", Input: `enum ProjectTag {
+  WEBDEVELOPMENT
+  SOCIALMEDIA
+}
+
+"All fields that represent a project"
 type Project{
   id: UUID!
   user_id: UUID!
@@ -832,6 +845,7 @@ type Project{
   updated_at: Time!
   title: String!
   content: String!
+  tag: ProjectTag!
   img_cover: String!
   img_description: String!
   language: String!
@@ -857,6 +871,8 @@ input UpdateProjectInput {
     url: String!
     "id of the Project (required)"
     id: UUID!
+    "tag of the Project (required)"
+    tag: ProjectTag!
 }
 
 
@@ -876,6 +892,8 @@ input CreateProjectInput {
     language: String!
     "url of the Project (required)"
     url: String!
+    "tag of the Project (required)"
+    tag: ProjectTag!
 }
 
 
@@ -2732,6 +2750,8 @@ func (ec *executionContext) fieldContext_Mutation_createProject(ctx context.Cont
 				return ec.fieldContext_Project_title(ctx, field)
 			case "content":
 				return ec.fieldContext_Project_content(ctx, field)
+			case "tag":
+				return ec.fieldContext_Project_tag(ctx, field)
 			case "img_cover":
 				return ec.fieldContext_Project_img_cover(ctx, field)
 			case "img_description":
@@ -2838,6 +2858,8 @@ func (ec *executionContext) fieldContext_Mutation_updateProject(ctx context.Cont
 				return ec.fieldContext_Project_title(ctx, field)
 			case "content":
 				return ec.fieldContext_Project_content(ctx, field)
+			case "tag":
+				return ec.fieldContext_Project_tag(ctx, field)
 			case "img_cover":
 				return ec.fieldContext_Project_img_cover(ctx, field)
 			case "img_description":
@@ -3246,6 +3268,50 @@ func (ec *executionContext) fieldContext_Project_content(ctx context.Context, fi
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Project_tag(ctx context.Context, field graphql.CollectedField, obj *model.Project) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Project_tag(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Tag, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.ProjectTag)
+	fc.Result = res
+	return ec.marshalNProjectTag2backᚑendᚑwebsiteᚋgraphᚋmodelᚐProjectTag(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Project_tag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ProjectTag does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3817,6 +3883,8 @@ func (ec *executionContext) fieldContext_Query_projects(ctx context.Context, fie
 				return ec.fieldContext_Project_title(ctx, field)
 			case "content":
 				return ec.fieldContext_Project_content(ctx, field)
+			case "tag":
+				return ec.fieldContext_Project_tag(ctx, field)
 			case "img_cover":
 				return ec.fieldContext_Project_img_cover(ctx, field)
 			case "img_description":
@@ -3893,6 +3961,8 @@ func (ec *executionContext) fieldContext_Query_project(ctx context.Context, fiel
 				return ec.fieldContext_Project_title(ctx, field)
 			case "content":
 				return ec.fieldContext_Project_content(ctx, field)
+			case "tag":
+				return ec.fieldContext_Project_tag(ctx, field)
 			case "img_cover":
 				return ec.fieldContext_Project_img_cover(ctx, field)
 			case "img_description":
@@ -6405,7 +6475,7 @@ func (ec *executionContext) unmarshalInputCreateProjectInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "content", "img_cover", "img_description", "user_id", "language", "url"}
+	fieldsInOrder := [...]string{"title", "content", "img_cover", "img_description", "user_id", "language", "url", "tag"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6465,6 +6535,14 @@ func (ec *executionContext) unmarshalInputCreateProjectInput(ctx context.Context
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
 			it.URL, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tag":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
+			it.Tag, err = ec.unmarshalNProjectTag2backᚑendᚑwebsiteᚋgraphᚋmodelᚐProjectTag(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6637,7 +6715,7 @@ func (ec *executionContext) unmarshalInputUpdateProjectInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "content", "img_cover", "img_description", "user_id", "language", "url", "id"}
+	fieldsInOrder := [...]string{"title", "content", "img_cover", "img_description", "user_id", "language", "url", "id", "tag"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6705,6 +6783,14 @@ func (ec *executionContext) unmarshalInputUpdateProjectInput(ctx context.Context
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			it.ID, err = ec.unmarshalNUUID2backᚑendᚑwebsiteᚋgraphᚋmypkgᚐUUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tag":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
+			it.Tag, err = ec.unmarshalNProjectTag2backᚑendᚑwebsiteᚋgraphᚋmodelᚐProjectTag(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7102,6 +7188,13 @@ func (ec *executionContext) _Project(ctx context.Context, sel ast.SelectionSet, 
 		case "content":
 
 			out.Values[i] = ec._Project_content(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "tag":
+
+			out.Values[i] = ec._Project_tag(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -7820,6 +7913,16 @@ func (ec *executionContext) marshalNJWTResponse2ᚖbackᚑendᚑwebsiteᚋgraph�
 		return graphql.Null
 	}
 	return ec._JWTResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNProjectTag2backᚑendᚑwebsiteᚋgraphᚋmodelᚐProjectTag(ctx context.Context, v interface{}) (model.ProjectTag, error) {
+	var res model.ProjectTag
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProjectTag2backᚑendᚑwebsiteᚋgraphᚋmodelᚐProjectTag(ctx context.Context, sel ast.SelectionSet, v model.ProjectTag) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNSigninInput2backᚑendᚑwebsiteᚋgraphᚋmodelᚐSigninInput(ctx context.Context, v interface{}) (model.SigninInput, error) {

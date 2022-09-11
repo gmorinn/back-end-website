@@ -1,3 +1,8 @@
+enum ProjectTag {
+  WEBDEVELOPMENT
+  SOCIALMEDIA
+}
+
 "All fields that represent a project"
 type Project{
   id: UUID!
@@ -7,6 +12,7 @@ type Project{
   updated_at: Time!
   title: String!
   content: String!
+  tag: ProjectTag!
   img_cover: String!
   img_description: String!
   language: String!
@@ -32,6 +38,8 @@ input UpdateProjectInput {
     url: String!
     "id of the Project (required)"
     id: UUID!
+    "tag of the Project (required)"
+    tag: ProjectTag!
 }
 
 
@@ -51,6 +59,8 @@ input CreateProjectInput {
     language: String!
     "url of the Project (required)"
     url: String!
+    "tag of the Project (required)"
+    tag: ProjectTag!
 }
 
 
