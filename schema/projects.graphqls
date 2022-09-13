@@ -15,8 +15,9 @@ type Project{
   tag: ProjectTag!
   img_cover: String!
   img_description: String!
-  language: String!
+  language: String
   url: String!
+  client: String
 }
 
 
@@ -26,20 +27,22 @@ input UpdateProjectInput {
     title: String!
     "content of the Project (required)"
     content: String!
-    "img_cover of the Project (required)"
+    "img_cover of the Project, take a file (required)"
     img_cover: String!
     "img_description of the Project (required)"
     img_description: String!
     "user_id of the Project (required)"
     user_id: UUID!
-    "language of the Project (required)"
-    language: String!
+    "language of the Project"
+    language: String
     "url of the Project (required)"
     url: String!
     "id of the Project (required)"
     id: UUID!
     "tag of the Project (required)"
     tag: ProjectTag!
+    "client of the Project"
+    client: String
 }
 
 
@@ -55,12 +58,14 @@ input CreateProjectInput {
     img_description: String!
     "user_id of the Project (required)"
     user_id: UUID!
-    "language of the Project (required)"
-    language: String!
+    "language of the Project"
+    language: String
     "url of the Project (required)"
     url: String!
     "tag of the Project (required)"
     tag: ProjectTag!
+    "client of the Project"
+    client: String
 }
 
 

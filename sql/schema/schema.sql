@@ -46,6 +46,7 @@
     "img_cover" text NOT NULL,
     "img_description" text NOT NULL,
     "language" text,
+    "client" text CONSTRAINT clientchk CHECK (char_length(content) <= 70) DEFAULT NULL,
     "tag" project_tag NOT NULL DEFAULT 'webdevelopment',
     "url" text NOT NULL
   );

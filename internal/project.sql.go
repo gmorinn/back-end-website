@@ -14,7 +14,7 @@ import (
 
 const checkProjectByID = `-- name: CheckProjectByID :one
 SELECT EXISTS(
-    SELECT id, created_at, updated_at, deleted_at, user_id, title, content, img_cover, img_description, language, tag, url FROM projects
+    SELECT id, created_at, updated_at, deleted_at, user_id, title, content, img_cover, img_description, language, client, tag, url FROM projects
     WHERE id = $1
     AND deleted_at IS NULL
 )
@@ -42,7 +42,7 @@ func (q *Queries) DeleteProjectByID(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllProject = `-- name: GetAllProject :many
-SELECT id, created_at, updated_at, deleted_at, user_id, title, content, img_cover, img_description, language, tag, url FROM projects
+SELECT id, created_at, updated_at, deleted_at, user_id, title, content, img_cover, img_description, language, client, tag, url FROM projects
 WHERE deleted_at IS NULL
 ORDER BY
   CASE WHEN $1::bool THEN title END asc,
@@ -51,11 +51,13 @@ ORDER BY
   CASE WHEN $4::bool THEN created_at END desc,
   CASE WHEN $5::bool THEN tag END asc,
   CASE WHEN $6::bool THEN tag END desc,
-  CASE WHEN $7::bool THEN language END asc,
-  CASE WHEN $8::bool THEN language END desc,
-  CASE WHEN $9::bool THEN content END asc,
-  CASE WHEN $10::bool THEN content END desc
-LIMIT $12 OFFSET $11
+  CASE WHEN $7::bool THEN client END asc,
+  CASE WHEN $8::bool THEN client END desc,
+  CASE WHEN $9::bool THEN language END asc,
+  CASE WHEN $10::bool THEN language END desc,
+  CASE WHEN $11::bool THEN content END asc,
+  CASE WHEN $12::bool THEN content END desc
+LIMIT $14 OFFSET $13
 `
 
 type GetAllProjectParams struct {
@@ -65,6 +67,8 @@ type GetAllProjectParams struct {
 	CreatedAtDesc bool  `json:"created_at_desc"`
 	TagAsc        bool  `json:"tag_asc"`
 	TagDesc       bool  `json:"tag_desc"`
+	ClientAsc     bool  `json:"client_asc"`
+	ClientDesc    bool  `json:"client_desc"`
 	LanguageAsc   bool  `json:"language_asc"`
 	LanguageDesc  bool  `json:"language_desc"`
 	ContentAsc    bool  `json:"content_asc"`
@@ -81,6 +85,8 @@ func (q *Queries) GetAllProject(ctx context.Context, arg GetAllProjectParams) ([
 		arg.CreatedAtDesc,
 		arg.TagAsc,
 		arg.TagDesc,
+		arg.ClientAsc,
+		arg.ClientDesc,
 		arg.LanguageAsc,
 		arg.LanguageDesc,
 		arg.ContentAsc,
@@ -106,6 +112,7 @@ func (q *Queries) GetAllProject(ctx context.Context, arg GetAllProjectParams) ([
 			&i.ImgCover,
 			&i.ImgDescription,
 			&i.Language,
+			&i.Client,
 			&i.Tag,
 			&i.Url,
 		); err != nil {
@@ -123,7 +130,7 @@ func (q *Queries) GetAllProject(ctx context.Context, arg GetAllProjectParams) ([
 }
 
 const getProjectByID = `-- name: GetProjectByID :one
-SELECT id, created_at, updated_at, deleted_at, user_id, title, content, img_cover, img_description, language, tag, url FROM projects
+SELECT id, created_at, updated_at, deleted_at, user_id, title, content, img_cover, img_description, language, client, tag, url FROM projects
 WHERE id = $1
 AND deleted_at IS NULL
 LIMIT 1
@@ -143,6 +150,7 @@ func (q *Queries) GetProjectByID(ctx context.Context, id uuid.UUID) (Project, er
 		&i.ImgCover,
 		&i.ImgDescription,
 		&i.Language,
+		&i.Client,
 		&i.Tag,
 		&i.Url,
 	)
@@ -150,9 +158,9 @@ func (q *Queries) GetProjectByID(ctx context.Context, id uuid.UUID) (Project, er
 }
 
 const insertProject = `-- name: InsertProject :one
-INSERT INTO projects (user_id, title, content, language, url, img_cover, img_description, tag)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, created_at, updated_at, deleted_at, user_id, title, content, img_cover, img_description, language, tag, url
+INSERT INTO projects (user_id, title, content, language, url, img_cover, img_description, tag, client)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, created_at, updated_at, deleted_at, user_id, title, content, img_cover, img_description, language, client, tag, url
 `
 
 type InsertProjectParams struct {
@@ -164,6 +172,7 @@ type InsertProjectParams struct {
 	ImgCover       string         `json:"img_cover"`
 	ImgDescription string         `json:"img_description"`
 	Tag            ProjectTag     `json:"tag"`
+	Client         sql.NullString `json:"client"`
 }
 
 func (q *Queries) InsertProject(ctx context.Context, arg InsertProjectParams) (Project, error) {
@@ -176,6 +185,7 @@ func (q *Queries) InsertProject(ctx context.Context, arg InsertProjectParams) (P
 		arg.ImgCover,
 		arg.ImgDescription,
 		arg.Tag,
+		arg.Client,
 	)
 	var i Project
 	err := row.Scan(
@@ -189,6 +199,7 @@ func (q *Queries) InsertProject(ctx context.Context, arg InsertProjectParams) (P
 		&i.ImgCover,
 		&i.ImgDescription,
 		&i.Language,
+		&i.Client,
 		&i.Tag,
 		&i.Url,
 	)
@@ -207,10 +218,11 @@ SET
     img_description = $7,
     user_id = $8,
     tag = $9,
+    client = $10,
     updated_at = NOW()
 WHERE
     id = $1
-RETURNING id, created_at, updated_at, deleted_at, user_id, title, content, img_cover, img_description, language, tag, url
+RETURNING id, created_at, updated_at, deleted_at, user_id, title, content, img_cover, img_description, language, client, tag, url
 `
 
 type UpdateProjectParams struct {
@@ -223,6 +235,7 @@ type UpdateProjectParams struct {
 	ImgDescription string         `json:"img_description"`
 	UserID         uuid.UUID      `json:"user_id"`
 	Tag            ProjectTag     `json:"tag"`
+	Client         sql.NullString `json:"client"`
 }
 
 func (q *Queries) UpdateProject(ctx context.Context, arg UpdateProjectParams) error {
@@ -236,6 +249,7 @@ func (q *Queries) UpdateProject(ctx context.Context, arg UpdateProjectParams) er
 		arg.ImgDescription,
 		arg.UserID,
 		arg.Tag,
+		arg.Client,
 	)
 	return err
 }

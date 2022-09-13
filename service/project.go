@@ -39,7 +39,8 @@ func SqlProjectToGraphProject(sqlProject *db.Project) *model.Project {
 		ImgCover:       sqlProject.ImgCover,
 		ImgDescription: sqlProject.ImgDescription,
 		URL:            sqlProject.Url,
-		Language:       sqlProject.Language.String,
+		Language:       &sqlProject.Language.String,
+		Client:         &sqlProject.Client.String,
 		Tag:            model.ProjectTag(sqlProject.Tag),
 	}
 }
@@ -62,11 +63,21 @@ func (s *ProjectService) CreateProject(ctx context.Context, input *model.CreateP
 		if !isUser {
 			return utils.ErrorResponse("USER_NOT_FOUND", errors.New("User not found"))
 		}
+
+		var language string
+		var client string
+		if input.Language != nil {
+			language = *input.Language
+		}
+		if input.Client != nil {
+			client = *input.Client
+		}
 		// create Project
 		newProject, err := q.InsertProject(ctx, db.InsertProjectParams{
 			Title:          input.Title,
 			Content:        input.Content,
-			Language:       utils.NullS(input.Language),
+			Language:       utils.NullS(language),
+			Client:         utils.NullS(client),
 			Url:            input.URL,
 			Tag:            db.ProjectTag(input.Tag),
 			ImgCover:       input.ImgCover,
@@ -99,12 +110,21 @@ func (s *ProjectService) UpdateProject(ctx context.Context, input *model.UpdateP
 
 	err := s.server.Store.ExecTx(ctx, func(q *db.Queries) error {
 		// update Project
+		var language string
+		var client string
+		if input.Language != nil {
+			language = *input.Language
+		}
+		if input.Client != nil {
+			client = *input.Client
+		}
 		if err := q.UpdateProject(ctx, db.UpdateProjectParams{
 			ID:             uuid.MustParse(string(input.ID)),
 			Title:          input.Title,
 			Content:        input.Content,
-			Language:       utils.NullS(input.Language),
+			Language:       utils.NullS(language),
 			Tag:            db.ProjectTag(input.Tag),
+			Client:         utils.NullS(client),
 			Url:            input.URL,
 			ImgCover:       input.ImgCover,
 			ImgDescription: input.ImgDescription,

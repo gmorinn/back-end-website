@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE "projects" ADD COLUMN "client" text DEFAULT NULL;
+
+COMMIT; 

@@ -47,12 +47,14 @@ type CreateProjectInput struct {
 	ImgDescription string `json:"img_description"`
 	// user_id of the Project (required)
 	UserID mypkg.UUID `json:"user_id"`
-	// language of the Project (required)
-	Language string `json:"language"`
+	// language of the Project
+	Language *string `json:"language"`
 	// url of the Project (required)
 	URL string `json:"url"`
 	// tag of the Project (required)
 	Tag ProjectTag `json:"tag"`
+	// client of the Project
+	Client *string `json:"client"`
 }
 
 type JWTResponse struct {
@@ -74,8 +76,9 @@ type Project struct {
 	Tag            ProjectTag `json:"tag"`
 	ImgCover       string     `json:"img_cover"`
 	ImgDescription string     `json:"img_description"`
-	Language       string     `json:"language"`
+	Language       *string    `json:"language"`
 	URL            string     `json:"url"`
+	Client         *string    `json:"client"`
 }
 
 type SigninInput struct {
@@ -118,20 +121,22 @@ type UpdateProjectInput struct {
 	Title string `json:"title"`
 	// content of the Project (required)
 	Content string `json:"content"`
-	// img_cover of the Project (required)
+	// img_cover of the Project, take a file (required)
 	ImgCover string `json:"img_cover"`
 	// img_description of the Project (required)
 	ImgDescription string `json:"img_description"`
 	// user_id of the Project (required)
 	UserID mypkg.UUID `json:"user_id"`
-	// language of the Project (required)
-	Language string `json:"language"`
+	// language of the Project
+	Language *string `json:"language"`
 	// url of the Project (required)
 	URL string `json:"url"`
 	// id of the Project (required)
 	ID mypkg.UUID `json:"id"`
 	// tag of the Project (required)
 	Tag ProjectTag `json:"tag"`
+	// client of the Project
+	Client *string `json:"client"`
 }
 
 // payload send when you update a user

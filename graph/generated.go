@@ -80,6 +80,7 @@ type ComplexityRoot struct {
 	}
 
 	Project struct {
+		Client         func(childComplexity int) int
 		Content        func(childComplexity int) int
 		CreatedAt      func(childComplexity int) int
 		DeletedAt      func(childComplexity int) int
@@ -386,6 +387,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(model.UpdateUserInput)), true
+
+	case "Project.client":
+		if e.complexity.Project.Client == nil {
+			break
+		}
+
+		return e.complexity.Project.Client(childComplexity), true
 
 	case "Project.content":
 		if e.complexity.Project.Content == nil {
@@ -848,8 +856,9 @@ type Project{
   tag: ProjectTag!
   img_cover: String!
   img_description: String!
-  language: String!
+  language: String
   url: String!
+  client: String
 }
 
 
@@ -859,20 +868,22 @@ input UpdateProjectInput {
     title: String!
     "content of the Project (required)"
     content: String!
-    "img_cover of the Project (required)"
+    "img_cover of the Project, take a file (required)"
     img_cover: String!
     "img_description of the Project (required)"
     img_description: String!
     "user_id of the Project (required)"
     user_id: UUID!
-    "language of the Project (required)"
-    language: String!
+    "language of the Project"
+    language: String
     "url of the Project (required)"
     url: String!
     "id of the Project (required)"
     id: UUID!
     "tag of the Project (required)"
     tag: ProjectTag!
+    "client of the Project"
+    client: String
 }
 
 
@@ -888,12 +899,14 @@ input CreateProjectInput {
     img_description: String!
     "user_id of the Project (required)"
     user_id: UUID!
-    "language of the Project (required)"
-    language: String!
+    "language of the Project"
+    language: String
     "url of the Project (required)"
     url: String!
     "tag of the Project (required)"
     tag: ProjectTag!
+    "client of the Project"
+    client: String
 }
 
 
@@ -2760,6 +2773,8 @@ func (ec *executionContext) fieldContext_Mutation_createProject(ctx context.Cont
 				return ec.fieldContext_Project_language(ctx, field)
 			case "url":
 				return ec.fieldContext_Project_url(ctx, field)
+			case "client":
+				return ec.fieldContext_Project_client(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Project", field.Name)
 		},
@@ -2868,6 +2883,8 @@ func (ec *executionContext) fieldContext_Mutation_updateProject(ctx context.Cont
 				return ec.fieldContext_Project_language(ctx, field)
 			case "url":
 				return ec.fieldContext_Project_url(ctx, field)
+			case "client":
+				return ec.fieldContext_Project_client(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Project", field.Name)
 		},
@@ -3426,14 +3443,11 @@ func (ec *executionContext) _Project_language(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Project_language(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3481,6 +3495,47 @@ func (ec *executionContext) _Project_url(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) fieldContext_Project_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Project_client(ctx context.Context, field graphql.CollectedField, obj *model.Project) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Project_client(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Client, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Project_client(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Project",
 		Field:      field,
@@ -3893,6 +3948,8 @@ func (ec *executionContext) fieldContext_Query_projects(ctx context.Context, fie
 				return ec.fieldContext_Project_language(ctx, field)
 			case "url":
 				return ec.fieldContext_Project_url(ctx, field)
+			case "client":
+				return ec.fieldContext_Project_client(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Project", field.Name)
 		},
@@ -3971,6 +4028,8 @@ func (ec *executionContext) fieldContext_Query_project(ctx context.Context, fiel
 				return ec.fieldContext_Project_language(ctx, field)
 			case "url":
 				return ec.fieldContext_Project_url(ctx, field)
+			case "client":
+				return ec.fieldContext_Project_client(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Project", field.Name)
 		},
@@ -6475,7 +6534,7 @@ func (ec *executionContext) unmarshalInputCreateProjectInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "content", "img_cover", "img_description", "user_id", "language", "url", "tag"}
+	fieldsInOrder := [...]string{"title", "content", "img_cover", "img_description", "user_id", "language", "url", "tag", "client"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6526,7 +6585,7 @@ func (ec *executionContext) unmarshalInputCreateProjectInput(ctx context.Context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("language"))
-			it.Language, err = ec.unmarshalNString2string(ctx, v)
+			it.Language, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6543,6 +6602,14 @@ func (ec *executionContext) unmarshalInputCreateProjectInput(ctx context.Context
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
 			it.Tag, err = ec.unmarshalNProjectTag2backᚑendᚑwebsiteᚋgraphᚋmodelᚐProjectTag(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "client":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("client"))
+			it.Client, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6715,7 +6782,7 @@ func (ec *executionContext) unmarshalInputUpdateProjectInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "content", "img_cover", "img_description", "user_id", "language", "url", "id", "tag"}
+	fieldsInOrder := [...]string{"title", "content", "img_cover", "img_description", "user_id", "language", "url", "id", "tag", "client"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6766,7 +6833,7 @@ func (ec *executionContext) unmarshalInputUpdateProjectInput(ctx context.Context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("language"))
-			it.Language, err = ec.unmarshalNString2string(ctx, v)
+			it.Language, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6791,6 +6858,14 @@ func (ec *executionContext) unmarshalInputUpdateProjectInput(ctx context.Context
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
 			it.Tag, err = ec.unmarshalNProjectTag2backᚑendᚑwebsiteᚋgraphᚋmodelᚐProjectTag(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "client":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("client"))
+			it.Client, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7217,9 +7292,6 @@ func (ec *executionContext) _Project(ctx context.Context, sel ast.SelectionSet, 
 
 			out.Values[i] = ec._Project_language(ctx, field, obj)
 
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "url":
 
 			out.Values[i] = ec._Project_url(ctx, field, obj)
@@ -7227,6 +7299,10 @@ func (ec *executionContext) _Project(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "client":
+
+			out.Values[i] = ec._Project_client(ctx, field, obj)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

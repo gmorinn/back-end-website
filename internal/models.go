@@ -84,6 +84,7 @@ type Project struct {
 	ImgCover       string         `json:"img_cover"`
 	ImgDescription string         `json:"img_description"`
 	Language       sql.NullString `json:"language"`
+	Client         sql.NullString `json:"client"`
 	Tag            ProjectTag     `json:"tag"`
 	Url            string         `json:"url"`
 }
